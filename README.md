@@ -19,7 +19,7 @@ MODAL EVALUATION
 <br>
 <img src="figures/Log_Reg_confusion_matrix.png" width="300" height="300"/>
 <img src="figures/XGB_confusion_matrix.png" width="300" height="300"/>
-<img src="figures/Model_comparison.png" width="300" height="500"/>
+<img src="figures/Model_comparison.png" width="300" height="700"/>
 
 
 
