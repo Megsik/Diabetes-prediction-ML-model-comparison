@@ -72,6 +72,14 @@ for j in range(i+1, len(axes)):
 
 plt.show()
 
+#Boxplot of numerical features
+for i, col in enumerate(numerical_cols):
+    plt.figure(figsize=(6,4))
+    sns.boxplot(x=train_df[col])
+    plt.title(f"Boxplot of {col}")
+    plt.xlabel(col)
+    plt.show()
+
 
 # Correlation heatmap
 plt.figure(figsize=(12, 10))
@@ -101,13 +109,24 @@ preprocessor = ColumnTransformer(transformers=[
 # -----------------------------
 #  Models
 # -----------------------------
+
+#checking for imbalance to reduce bias
+positive = y.sum()
+negative = len(y) - positive
+
+
+ratio_positive_over_negative = positive / negative
+ratio_negative_over_positive = negative / positive
+
+scale_pos_weight = negative / positive
+
 models = {
     "Logistic Regression": LogisticRegression(
         max_iter=1000,
         class_weight="balanced"
     ),
     "XGBoost Classifier": XGBClassifier(
-        scale_pos_weight=43667 / 7069,  # neg / pos
+        scale_pos_weight=scale_pos_weight,  # neg / pos
         eval_metric="logloss"
     )
 }
