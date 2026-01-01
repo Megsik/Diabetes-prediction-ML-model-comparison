@@ -20,7 +20,8 @@ from sklearn.pipeline import Pipeline
 # Load dataset
 # -----------------------------
 # Replace with your file path
-df = pd.read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+
+df = pd.read_csv("diabetes_binary_health_indicators_BRFSS2015.csv") # this file could be found in the dataset downloaded from kaggle (link in README)
 
 # Inspect basic info
 print(df.head())
