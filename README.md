@@ -15,13 +15,9 @@ EXPLORATORY DATA ANAYSIS
 PREPROCESSING
 Dataset was split into 80% train and 20% test parts. Numerical features with more than 0.05 absolute correlation were selected. Numerical features were standardized and categorical features were one hot encoded. 
 
-
-
-Model Evalution 
+MODAL EVALUATION 
 ![Logistic Regression Confusion matrix](figures/Log_Reg_confusion_matrix.png)
-
 ![XGBoost Classifier Confusion matrix](figures/XGB_confusion_matrix.png)
-
 ![Model Comparison](figures/Model_comparison.png)
 
 Both models achieve high accuracy probably due to class imbalance.
