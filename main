@@ -79,7 +79,7 @@ for i, col in enumerate(numerical_cols):
     plt.title(f"Boxplot of {col}")
     plt.xlabel(col)
     plt.show()
-
+# Due to the binary nature of data some of the box plots wont be useful
 
 # Correlation heatmap
 plt.figure(figsize=(12, 10))
