@@ -1,5 +1,5 @@
 # -----------------------------
-# Diabetes Prediction Model Comparison
+# Diabetes Prediction Template
 # -----------------------------
 
 # Import libraries
@@ -15,13 +15,17 @@ from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+import os
+
+os.makedirs("figures", exist_ok=True)
+
 
 # -----------------------------
 # Load dataset
 # -----------------------------
 # Replace with your file path
-
-df = pd.read_csv("diabetes_binary_health_indicators_BRFSS2015.csv") # this file could be found in the dataset downloaded from kaggle (link in README)
+# Dataset link is in the README
+df = pd.read_csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 
 # Inspect basic info
 print(df.head())
@@ -31,8 +35,8 @@ print(df.describe())
 # -----------------------------
 #  Split into train/test
 # -----------------------------
-train_df, test_df = train_test_split(df, test_size=0.2, random_state=42, stratify=df['Diabetes_binary'])
-print(f"Train shape: {train_df.shape}, Test shape: {test_df.shape}")
+X, y = train_test_split(df, test_size=0.2, random_state=42, stratify=df['Diabetes_binary'])
+print(f"Train shape: {X.shape}, Test shape: {y.shape}")
 
 # -----------------------------
 #  Identify numerical and categorical columns
@@ -40,8 +44,8 @@ print(f"Train shape: {train_df.shape}, Test shape: {test_df.shape}")
 target_col = 'Diabetes_binary'
 feature_cols = [col for col in df.columns if col != target_col]
 
-numerical_cols = train_df[feature_cols].select_dtypes(include=['int64', 'float64']).columns.tolist()
-categorical_cols = train_df[feature_cols].select_dtypes(include=['object', 'category']).columns.tolist()
+numerical_cols = X[feature_cols].select_dtypes(include=['int64', 'float64']).columns.tolist()
+categorical_cols = X[feature_cols].select_dtypes(include=['object', 'category']).columns.tolist()
 
 print("Numerical columns:", numerical_cols)
 print("Categorical columns:", categorical_cols)
@@ -50,6 +54,10 @@ print("Categorical columns:", categorical_cols)
 #  Exploratory Data Analysis
 # -----------------------------
 # Histogram of numerical features
+
+
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 
 num_features = len(numerical_cols)
 cols = 5  # number of columns in the grid
@@ -61,7 +69,7 @@ fig, axes = plt.subplots(rows, cols, figsize=(20, 4*rows), constrained_layout=Tr
 axes = axes.flatten()
 
 for i, col in enumerate(numerical_cols):
-    sns.histplot(train_df[col], kde=True, bins=30, ax=axes[i])
+    sns.histplot(X[col], kde=True, bins=30, ax=axes[i])
     axes[i].set_title(col, fontsize=10)
     axes[i].set_xlabel("")
     axes[i].set_ylabel("")
@@ -72,27 +80,25 @@ for j in range(i+1, len(axes)):
 
 plt.show()
 
-#Boxplot of numerical features
 for i, col in enumerate(numerical_cols):
     plt.figure(figsize=(6,4))
-    sns.boxplot(x=train_df[col])
+    sns.boxplot(x=X[col])
     plt.title(f"Boxplot of {col}")
     plt.xlabel(col)
     plt.show()
-# Due to the binary nature of data some of the box plots wont be useful
-
+#Boxplot may not be useful for this data due to its binary nature
 # Correlation heatmap
 plt.figure(figsize=(12, 10))
-corr = train_df[numerical_cols + [target_col]].corr()
+corr = X[numerical_cols + [target_col]].corr()
 sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title("Correlation Heatmap")
+plt.savefig("figures/model_comparison.png", dpi=300)
 plt.show()
 
 # -----------------------------
 # Feature selection based on correlation
 # -----------------------------
-
-# Keep features with absolute correlation > 0.05 with target
+# Keep features with absolute correlation > 0.05 with target (common practice)
 selected_features = corr[target_col][abs(corr[target_col]) > 0.05].index.tolist()
 selected_features.remove(target_col)  # remove target itself
 print("Selected features:", selected_features)
@@ -109,16 +115,16 @@ preprocessor = ColumnTransformer(transformers=[
 # -----------------------------
 #  Models
 # -----------------------------
-
 #checking for imbalance to reduce bias
-positive = y.sum()
-negative = len(y) - positive
-
+positive = X[target_col].sum()
+negative = len(X) - positive
 
 ratio_positive_over_negative = positive / negative
 ratio_negative_over_positive = negative / positive
 
 scale_pos_weight = negative / positive
+print("positive samples:", positive)
+print("negative samples:", negative)
 
 models = {
     "Logistic Regression": LogisticRegression(
@@ -139,21 +145,22 @@ results = {}
 for name, model in models.items():
     pipeline = Pipeline(steps=[('preprocessor', preprocessor),
                                ('classifier', model)])
-    pipeline.fit(train_df, train_df[target_col])
-    preds = pipeline.predict(test_df)
-    acc = accuracy_score(test_df[target_col], preds)
+    pipeline.fit(X, X[target_col])
+    preds = pipeline.predict(y)
+    acc = accuracy_score(y[target_col], preds)
     results[name] = acc
     print(f"\n{name} Accuracy: {acc:.4f}")
     print(f"{name} Classification Report:")
-    print(classification_report(test_df[target_col], preds))
+    print(classification_report(y[target_col], preds))
     
     # Confusion matrix
-    cm = confusion_matrix(test_df[target_col], preds)
+    cm = confusion_matrix(y[target_col], preds)
     plt.figure(figsize=(5, 4))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
     plt.title(f"{name} Confusion Matrix")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
+    plt.savefig(f"figures/{name.replace(' ', '_').lower()}_confusion_matrix.png", dpi=300)
     plt.show()
 
 # -----------------------------
