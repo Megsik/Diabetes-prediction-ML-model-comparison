@@ -55,10 +55,6 @@ print("Categorical columns:", categorical_cols)
 # -----------------------------
 # Histogram of numerical features
 
-
-#import matplotlib.pyplot as plt
-#import seaborn as sns
-
 num_features = len(numerical_cols)
 cols = 5  # number of columns in the grid
 rows = (num_features + cols - 1) // cols  # ceiling division to get enough rows
